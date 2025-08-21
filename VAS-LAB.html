@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quimix – Estudos de Química por VAZ</title>
+<style>
+:root{
+  --bg:#0b1020; --card:#121832; --muted:#98a2b3; --text:#e6e9ef;
+  --accent:#34d399; --accent-2:#60a5fa; --warn:#f59e0b; --danger:#ef4444;
+  --ring: rgba(52,211,153,.35);
+}
+body{margin:0; font-family:Arial,sans-serif; background:var(--bg); color:var(--text);}
+header{padding:12px; background:var(--card); display:flex; justify-content:space-between; align-items:center;}
+header h1{margin:0; font-size:1.4em;}
+header button{padding:6px 10px; border:none; border-radius:6px; cursor:pointer;}
+main{max-width:1100px; margin:auto; padding:18px;}
+.card{background:var(--card); padding:18px; border-radius:12px; margin-bottom:18px;}
+button{cursor:pointer;}
+.quiz-q{margin-bottom:12px;}
+.option{display:block; padding:10px; margin:6px 0; border:1px solid rgba(148,163,184,.25); border-radius:12px; cursor:pointer;}
+.option.correct{border-color:rgba(16,185,129,.6); background:rgba(16,185,129,.1);}
+.option.wrong{border-color:rgba(239,68,68,.7); background:rgba(239,68,68,.1);}
+input[type="text"]{padding:6px; border-radius:6px; border:1px solid #ccc; width:200px;}
+a{color:var(--accent-2); text-decoration:none;}
+a:hover{text-decoration:underline;}
+nav a{padding:6px 12px; border-radius:6px; background:rgba(52,211,153,.2);}
+nav a:hover{background:rgba(52,211,153,.35);}
+</style>
+</head>
+<body>
+<header>
+  <h1>Quimix by VAZ 🔬</h1>
+  <button onclick="toggleTheme()">🌗 Tema</button>
+</header>
+
+<!-- Menu interativo -->
+<nav class="card" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px;">
+  <a href="#quiz">📝 Quiz Rápido</a>
+  <a href="#tabela">📊 Tabela Periódica</a>
+  <a href="#respostas">💬 Enviar Resposta</a>
+  <a href="#footer">🌐 Site do VAZ LAB</a>
+</nav>
+
+<main>
+<section id="quiz" class="card">
+  <h2>📝 Quiz rápido</h2>
+  <div id="quizBox"></div>
+  <button id="submitQuiz">Ver Resultado</button>
+  <button id="resetQuiz">Refazer</button>
+  <p id="quizResult"></p>
+  <p>Quer aprender mais sobre ligações químicas? <a href="https://pt.wikipedia.org/wiki/Liga%C3%A7%C3%A3o_qu%C3%ADmica" target="_blank">Clique aqui!</a> – Criado por VAZ 🔬</p>
+</section>
+
+<section id="tabela" class="card">
+  <h2>📊 Tabela Periódica</h2>
+  <input type="text" id="searchElem" placeholder="Buscar elemento (símbolo ou nome)">
+  <div id="ptable" style="display:grid; grid-template-columns:repeat(9,1fr); gap:6px; margin-top:10px;"></div>
+  <p>Mais sobre elementos químicos? <a href="https://pt.wikipedia.org/wiki/Elemento_qu%C3%ADmico" target="_blank">Saiba aqui!</a> – Criado por VAZ 🔬</p>
+</section>
+
+<section id="respostas" class="card">
+  <h2>💬 Enviar Resposta</h2>
+  <input type="text" id="userAnswer" placeholder="Digite sua resposta">
+  <button onclick="addAnswer()">Enviar</button>
+  <div id="answersList" style="margin-top:10px;"></div>
+  <p>Quer discutir conceitos avançados? <a href="https://pt.wikipedia.org/wiki/Qu%C3%ADmica" target="_blank">Clique aqui!</a> – Criado por VAZ 🔬</p>
+</section>
+
+<footer id="footer" class="card" style="text-align:center;">
+  Feito por VAZ 🔬 | <a href="https://seu-usuario.github.io/Vaz-LAB/" target="_blank">🌐 Visite o VAZ LAB</a>
+</footer>
+</main>
+
+<script>
+// Tema claro/escuro
+function toggleTheme(){
+  document.body.style.background = document.body.style.background=== 'var(--bg)' ? '#f8fafc' : 'var(--bg)';
+  document.body.style.color = document.body.style.color=== 'var(--text)' ? '#0f172a' : 'var(--text)';
+}
+
+// Quiz
+const quizData = [
+  { q:'(1) O número atômico Z representa:', options:['nêutrons','prótons','elétrons camada externa','prótons+nêutrons'], correct:1, exp:'Z é a contagem de prótons no núcleo.' },
+  { q:'(2) Ligação covalente envolve:', options:['Transferência','Compartilhamento','Repulsão','Troca iônica'], correct:1, exp:'Covalente = compartilhamento de pares eletrônicos.' },
+  { q:'(3) Coeficiente da água em 2H₂+O₂→2H₂O:', options:['1','2','3','4'], correct:1, exp:'2 moléculas de H₂O.' },
+  { q:'(4) pH de [H⁺]=1×10⁻³ mol/L:', options:['3','11','7','1'], correct:0, exp:'pH=-log(10⁻³)=3.' },
+  { q:'(5) Processo que absorve calor:', options:['Exotérmico','Endotérmico','Isotérmico','Adiabático'], correct:1, exp:'Endotérmico absorve calor.' }
+];
+const quizBox = document.getElementById('quizBox');
+function renderQuiz(){
+  quizBox.innerHTML = quizData.map((item,i)=>{
+    const opts = item.options.map((op,j)=>{
+      return <label class="option"><input type="radio" name="q${i}" value="${j}"> ${op}</label>;
+    }).join('');
+    return <div class="quiz-q"><h3>${item.q}</h3>${opts}<div class="exp" style="display:none; color:var(--accent)">${item.exp} – Criado por VAZ 🔬</div></div>;
+  }).join('');
+}
+function gradeQuiz(){
+  let acertos=0;
+  quizBox.querySelectorAll('.quiz-q').forEach((qEl,i)=>{
+    const chosen = qEl.querySelector('input[type="radio"]:checked');
+    const labels = qEl.querySelectorAll('label.option');
+    labels.forEach(l=>l.classList.remove('correct','wrong'));
+    const expDiv = qEl.querySelector('.exp');
+    expDiv.style.display='none';
+    if(chosen){
+      const val = Number(chosen.value);
+      if(val===quizData[i].correct) acertos++;
+      labels[val].classList.add(val===quizData[i].correct?'correct':'wrong');
+      expDiv.style.display='block';
+    }
+  });
+  document.getElementById('quizResult').textContent=Resultado: ${acertos}/${quizData.length} – Criado por VAZ 🔬;
+}
+document.getElementById('submitQuiz').addEventListener('click',gradeQuiz);
+document.getElementById('resetQuiz').addEventListener('click',()=>{renderQuiz(); document.getElementById('quizResult').textContent='';});
+renderQuiz();
+
+// Tabela periódica pesquisável
+const elements = [
+  {symbol:'H', name:'Hidrogênio', link:'https://pt.wikipedia.org/wiki/Hidrog%C3%AAnio'},
+  {symbol:'He', name:'Hélio', link:'https://pt.wikipedia.org/wiki/H%C3%A9lio'},
+  {symbol:'Li', name:'Lítio', link:'https://pt.wikipedia.org/wiki/L%C3%ADtio'},
+  {symbol:'Be', name:'Berílio', link:'https://pt.wikipedia.org/wiki/Ber%C3%ADlio'},
+  {symbol:'B', name:'Boro', link:'https://pt.wikipedia.org/wiki/Boro'},
+  {symbol:'C', name:'Carbono', link:'https://pt.wikipedia.org/wiki/Carbono'},
+  {symbol:'N', name:'Nitrogênio', link:'https://pt.wikipedia.org/wiki/Nitrog%C3%AAnio'},
+  {symbol:'O', name:'Oxigênio', link:'https://pt.wikipedia.org/wiki/Oxig%C3%AAnio'},
+  {symbol:'F', name:'Flúor', link:'https://pt.wikipedia.org/wiki/Fl%C3%BAor'},
+  {symbol:'Ne', name:'Neônio', link:'https://pt.wikipedia.org/wiki/Ne%C3%B4nio'}
+];
+const ptable = document.getElementById('ptable');
+function renderTable(filter=''){
+  ptable.innerHTML='';
+  elements.forEach(el=>{
+    if(el.symbol.toLowerCase().includes(filter)||el.name.toLowerCase().includes(filter)){
+      const a = document.createElement('a');
+      a.href = el.link;
+      a.target = '_blank';
+      a.textContent = ${el.symbol} (${el.name}) – VAZ 🔬;
+      a.style.display = 'block';
+      a.style.padding = '10px';
+      a.style.border = '1px solid rgba(148,163,184,.25)';
+      a.style.borderRadius = '12px';
+      a.style.textAlign = 'center';
+      a.style.background = '#121832';
+      a.style.color = '#e6e9ef';
+      ptable.appendChild(a);
+    }
+  });
+}
+document.getElementById('searchElem').addEventListener('input', e => renderTable(e.target.value.toLowerCase()));
+renderTable();
+
+// Área de respostas com localStorage
+function addAnswer(){
+  const val = document.getElementById('userAnswer').value.trim();
+  if(!val) return;
+  let answers = JSON.parse(localStorage.getItem('answers')||'[]');
+  answers.push(val);
+  localStorage.setItem('answers',JSON.stringify(answers));
+  document.getElementById('userAnswer').value='';
+  renderAnswers();
+}
+function renderAnswers(){
+  const answers = JSON.parse(localStorage.getItem('answers')||'[]');
+  document.getElementById('answersList').innerHTML = answers.map(a=><div>• ${a}</div>).join('');
+}
+renderAnswers();
+</script>
+</body>
+</html>
